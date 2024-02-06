@@ -1,17 +1,17 @@
 import { triangulate } from "../unfold.js";
 
-export function p(x, y, z) {
+function p(x, y, z) {
   return { x, y, z };
 }
 
 test("triangulate 1", () => {
-  const { x, y } = triangulate(p(0, 0, 0), p(3, 4, 0), 3, 4);
+  const { x, y } = triangulate(p(0, 0, 0), p(3, 4, 0), 3, 4, p(0, 10, 0));
   expect(x).toBeCloseTo(3);
   expect(y).toBeCloseTo(0);
 });
 
 test("triangulate 2", () => {
-  const { x, y } = triangulate(p(1, 2, 0), p(5, 1, 0), 5, 4);
+  const { x, y } = triangulate(p(1, 2, 0), p(5, 1, 0), 5, 4, p(0, 0, 0));
   expect(x).toBeCloseTo(5);
   expect(y).toBeCloseTo(5);
 });

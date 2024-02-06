@@ -15,9 +15,11 @@ export function unfold(lines) {
     A: { x: 0, y: 0 },
     B: { x: distance(A[0], B[0]), y: 0 },
   });
+  let OP = { x: 0, y: -100 };
   for (let i = 0; i < lines.length - 1; i++) {
-    const a = triangulate(output[i].A, output[i].B, distance(A[i], A[i + 1]), distance(B[i], A[i + 1]));
-    const b = triangulate(a, output[i].B, distance(A[i + 1], B[i + 1]), distance(B[i], B[i + 1]));
+    const a = triangulate(output[i].A, output[i].B, distance(A[i], A[i + 1]), distance(B[i], A[i + 1]), OP);
+    OP = output[i].A;
+    const b = triangulate(a, output[i].B, distance(A[i + 1], B[i + 1]), distance(B[i], B[i + 1]), OP);
     output.push({
       A: a,
       B: b,
@@ -43,8 +45,9 @@ export function distance(p1, p2) {
 
 /**
  * Triangulation of point X by given A, B and distances AX, BX.
+ * X and OP are on opposite sides of line AB
  */
-export function triangulate(A, B, AX, BX) {
+export function triangulate(A, B, AX, BX, OP) {
   if (AX == 0) return A;
   if (BX == 0) return B;
   if (A.y != B.y) {
@@ -58,9 +61,13 @@ export function triangulate(A, B, AX, BX) {
       i = (n - t) / (2 * (b - d)),
       k = (c - a) / (b - d),
       D = k * k * t + t - i * i,
-      x = (Math.sqrt(D) - i * k) / (k * k + 1) + a,
-      y = i + k * (x - a) + b;
-    return { x, y };
+      x1 = (Math.sqrt(D) - i * k) / (k * k + 1) + a,
+      y1 = i + k * (x1 - a) + b,
+      x2 = (-Math.sqrt(D) - i * k) / (k * k + 1) + a,
+      y2 = i + k * (x2 - a) + b;
+    const res1 = { x: x1, y: y1 };
+    const res2 = { x: x2, y: y2 };
+    return isOpposite(A, B, res1, OP) ? res1 : res2;
   } else if (A.x != B.x) {
     const a = A.x,
       b = A.y,
@@ -68,10 +75,27 @@ export function triangulate(A, B, AX, BX) {
       t = AX * AX,
       p = BX * BX,
       n = p - (a - c) * (a - c),
-      x = (n - t) / 2 / (a - c) + a,
-      y = Math.sqrt(t - (x - a) * (x - a)) + b;
-    return { x, y };
+      x1 = (n - t) / 2 / (a - c) + a,
+      y1 = Math.sqrt(t - (x1 - a) * (x1 - a)) + b,
+      x2 = x1,
+      y2 = -Math.sqrt(t - (x1 - a) * (x1 - a)) + b;
+    const res1 = { x: x1, y: y1 };
+    const res2 = { x: x2, y: y2 };
+    return isOpposite(A, B, res1, OP) ? res1 : res2;
   } else {
     throw Error("point A cannot be equal to B");
   }
+}
+
+/**
+ * returns true if points X and Y are on opposite sides of line AB
+ */
+export function isOpposite(A, B, X, Y) {
+  if (A.x == B.x) {
+    return (X.x - A.x) * (Y.x - A.x) <= 0;
+  }
+  if (A.y == B.y) {
+    return (X.y - A.y) * (Y.y - A.y) <= 0;
+  }
+  return ((X.x - A.x) / (B.x - A.x) - (X.y - A.y) / (B.y - A.y)) * ((Y.x - A.x) / (B.x - A.x) - (Y.y - A.y) / (B.y - A.y)) <= 0;
 }

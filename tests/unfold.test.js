@@ -1,4 +1,4 @@
-import { distance, unfold } from "../unfold.js";
+import { distance, isOpposite, unfold } from "../unfold.js";
 
 const input = [
   {
@@ -1231,5 +1231,15 @@ test("unfold all x > 0, y > 0", () => {
     expect(oA[i].y).toBeGreaterThanOrEqual(0);
     expect(oB[i].x).toBeGreaterThanOrEqual(0);
     expect(oB[i].y).toBeGreaterThanOrEqual(0);
+  }
+});
+
+test("unfold direction test", () => {
+  for (let i = 0; i < input.length - 1; i++) {
+    expect(isOpposite(oA[i + 1], oB[i], oA[i], oB[i + 1])).toBe(true);
+  }
+  for (let i = 0; i < input.length - 2; i++) {
+    expect(isOpposite(oA[i + 1], oB[i + 1], oA[i + 2], oA[i])).toBe(true);
+    expect(isOpposite(oA[i + 1], oB[i + 1], oB[i + 2], oB[i])).toBe(true);
   }
 });
